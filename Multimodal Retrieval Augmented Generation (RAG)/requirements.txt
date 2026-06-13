@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+langchain
+langchain-google-genai
+langchain-experimental
+supabase
+PyMuPDF
+pdfplumber
+python-dotenv
+pydantic
+pillow
+langchain-huggingface
+sentence-transformers
