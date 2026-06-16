@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Presentation Slide</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden; /* Mencegah horizontal scroll, tapi izinkan vertical scroll */
+        }
+        #slide-wrapper {
+            position: relative;
+            margin: 0 auto;
+            /* Wrapper ini akan memiliki width dan height yang sudah di-scale */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .slide-container {
+            position: absolute;
+            background-size: cover;
+            background-position: center;
+            transform-origin: top left;
+            /* Container asli akan mempertahankan resolusi 100% (misal 5734x3200), 
+               lalu di-scale down oleh CSS transform */
+            overflow: hidden;
+        }
+        .text-element {
+            position: absolute;
+            box-sizing: border-box;
+            background-color: transparent;
+        }
+        .text-element:focus {
+            white-space: pre-wrap !important; 
+            outline: 2px dashed #007bff;
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            cursor: text;
+            z-index: 10; 
+        }
+    </style>
+</head>
+<body>
+
+<div id="slide-wrapper">
+    <div class="slide-container" 
+         id="main-slide"
+         data-w="{{ image_width }}" 
+         data-h="{{ image_height }}" 
+         data-bg="{{ background_image_path }}">
+        
+        {% for item in text_items %}
+        <div class="text-element" 
+             contenteditable="true" 
+             data-x="{{ item.x }}" 
+             data-y="{{ item.y }}" 
+             data-w="{{ item.w }}" 
+             data-h="{{ item.h }}" 
+             data-color="{{ item.color }}" 
+             data-fs="{{ item.font_size }}"
+             data-weight="{{ item.weight|default('normal') }}"
+             data-align="{{ item.align|default('left') }}"
+             data-multiline="{{ 'true' if item.multiline else 'false' }}"
+             data-lh="{{ item.line_height|default(1.2) }}">{{ item.text|e }}</div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    const slide = document.getElementById('main-slide');
+    const wrapper = document.getElementById('slide-wrapper');
+    
+    if (slide && wrapper) {
+        const baseW = parseFloat(slide.getAttribute('data-w'));
+        const baseH = parseFloat(slide.getAttribute('data-h'));
+        
+        // Tetapkan ukuran asli ke slide container
+        slide.style.width = baseW + 'px';
+        slide.style.height = baseH + 'px';
+        slide.style.backgroundImage = 'url("' + encodeURI(slide.getAttribute('data-bg')).replace(/'/g, "%27") + '")';
+
+        // Logika Responsif: Scale slide agar mengambil lebar penuh layar (Full Width)
+        function fitToScreen() {
+            // Gunakan 100% dari lebar layar
+            const maxW = window.innerWidth;
+            
+            // Hitung skala hanya berdasarkan lebar agar full width seperti halaman web biasa
+            const scale = maxW / baseW;
+            
+            // Terapkan scale pada slide asli
+            slide.style.transform = `scale(${scale})`;
+            
+            // Sesuaikan ukuran wrapper agar memakan tempat yang tepat di flow dokumen
+            wrapper.style.width = maxW + 'px';
+            wrapper.style.height = (baseH * scale) + 'px';
+        }
+
+        window.addEventListener('resize', fitToScreen);
+        fitToScreen(); // Panggil saat pertama dimuat
+    }
+
+    // Menerapkan koordinat pada semua elemen teks (Tetap dalam resolusi piksel ASLI!)
+    document.querySelectorAll('.text-element').forEach(el => {
+        const x = parseFloat(el.getAttribute('data-x'));
+        const y = parseFloat(el.getAttribute('data-y'));
+        const w = parseFloat(el.getAttribute('data-w'));
+        const h = parseFloat(el.getAttribute('data-h'));
+        
+        el.style.color = el.getAttribute('data-color');
+        el.style.fontSize = el.getAttribute('data-fs') + 'px';
+        el.style.fontWeight = el.getAttribute('data-weight') || 'normal';
+        el.style.lineHeight = el.getAttribute('data-lh') || '1.2';
+        
+        const align = el.getAttribute('data-align') || 'left';
+        
+        if (align === 'center') {
+            el.style.left = (x + w / 2) + 'px';
+            el.style.top = (y + h / 2) + 'px';
+            el.style.transform = 'translate(-50%, -50%)';
+            el.style.textAlign = 'center';
+        } else {
+            el.style.left = x + 'px';
+            el.style.top = (y + h / 2) + 'px';
+            el.style.transform = 'translateY(-50%)';
+            el.style.textAlign = 'left';
+        }
+        
+        el.style.whiteSpace = 'pre';
+    });
+</script>
+
+</body>
+</html>

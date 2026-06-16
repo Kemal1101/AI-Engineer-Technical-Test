@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Presentation Slide</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden; /* Mencegah horizontal scroll, tapi izinkan vertical scroll */
+        }
+        #slide-wrapper {
+            position: relative;
+            margin: 0 auto;
+            /* Wrapper ini akan memiliki width dan height yang sudah di-scale */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .slide-container {
+            position: absolute;
+            background-size: cover;
+            background-position: center;
+            transform-origin: top left;
+            /* Container asli akan mempertahankan resolusi 100% (misal 5734x3200), 
+               lalu di-scale down oleh CSS transform */
+            overflow: hidden;
+        }
+        .text-element {
+            position: absolute;
+            box-sizing: border-box;
+            background-color: transparent;
+        }
+        .text-element:focus {
+            white-space: pre-wrap !important; 
+            outline: 2px dashed #007bff;
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            cursor: text;
+            z-index: 10; 
+        }
+    </style>
+</head>
+<body>
+
+<div id="slide-wrapper">
+    <div class="slide-container" 
+         id="main-slide"
+         data-w="5734" 
+         data-h="3200" 
+         data-bg="Profile Image Studio  Let's Enable Digital Transformation with Us (2)_page-0005_bg.jpg">
+        
+        
+        <div class="text-element" 
+             contenteditable="true" 
+             data-x="251" 
+             data-y="250" 
+             data-w="3369" 
+             data-h="269" 
+             data-color="rgb(9, 97, 168)" 
+             data-fs="201"
+             data-weight="bold"
+             data-align="left"
+             data-multiline="false"
+             data-lh="1.2">Jangkauan Pasar dan Kontak</div>
+        
+        <div class="text-element" 
+             contenteditable="true" 
+             data-x="4819" 
+             data-y="151" 
+             data-w="643" 
+             data-h="342" 
+             data-color="rgb(27, 125, 201)" 
+             data-fs="256"
+             data-weight="bold"
+             data-align="left"
+             data-multiline="false"
+             data-lh="1.2">Qfpis</div>
+        
+        <div class="text-element" 
+             contenteditable="true" 
+             data-x="3566" 
+             data-y="1193" 
+             data-w="1837" 
+             data-h="494" 
+             data-color="rgb(0, 2, 5)" 
+             data-fs="129"
+             data-weight="bold"
+             data-align="left"
+             data-multiline="true"
+             data-lh="1.28">Lokasi: JI. Akordeon, Perum.
+Bumi Tunggulwulung Indah G/8,
+Malang, Jawa Timur 65143.</div>
+        
+        <div class="text-element" 
+             contenteditable="true" 
+             data-x="729" 
+             data-y="1538" 
+             data-w="1324" 
+             data-h="757" 
+             data-color="rgb(7, 33, 55)" 
+             data-fs="136"
+             data-weight="bold"
+             data-align="center"
+             data-multiline="true"
+             data-lh="1.11">Melayani pasar
+industri, pemerintah,
+dan pasar
+internasional
+global.</div>
+        
+        <div class="text-element" 
+             contenteditable="true" 
+             data-x="3570" 
+             data-y="2107" 
+             data-w="1133" 
+             data-h="320" 
+             data-color="rgb(0, 0, 0)" 
+             data-fs="113"
+             data-weight="bold"
+             data-align="left"
+             data-multiline="true"
+             data-lh="1.42">Website:
+profileimage studio</div>
+        
+    </div>
+</div>
+
+<script>
+    const slide = document.getElementById('main-slide');
+    const wrapper = document.getElementById('slide-wrapper');
+    
+    if (slide && wrapper) {
+        const baseW = parseFloat(slide.getAttribute('data-w'));
+        const baseH = parseFloat(slide.getAttribute('data-h'));
+        
+        // Tetapkan ukuran asli ke slide container
+        slide.style.width = baseW + 'px';
+        slide.style.height = baseH + 'px';
+        slide.style.backgroundImage = 'url("' + encodeURI(slide.getAttribute('data-bg')).replace(/'/g, "%27") + '")';
+
+        // Logika Responsif: Scale slide agar mengambil lebar penuh layar (Full Width)
+        function fitToScreen() {
+            // Gunakan 100% dari lebar layar
+            const maxW = window.innerWidth;
+            
+            // Hitung skala hanya berdasarkan lebar agar full width seperti halaman web biasa
+            const scale = maxW / baseW;
+            
+            // Terapkan scale pada slide asli
+            slide.style.transform = `scale(${scale})`;
+            
+            // Sesuaikan ukuran wrapper agar memakan tempat yang tepat di flow dokumen
+            wrapper.style.width = maxW + 'px';
+            wrapper.style.height = (baseH * scale) + 'px';
+        }
+
+        window.addEventListener('resize', fitToScreen);
+        fitToScreen(); // Panggil saat pertama dimuat
+    }
+
+    // Menerapkan koordinat pada semua elemen teks (Tetap dalam resolusi piksel ASLI!)
+    document.querySelectorAll('.text-element').forEach(el => {
+        const x = parseFloat(el.getAttribute('data-x'));
+        const y = parseFloat(el.getAttribute('data-y'));
+        const w = parseFloat(el.getAttribute('data-w'));
+        const h = parseFloat(el.getAttribute('data-h'));
+        
+        el.style.color = el.getAttribute('data-color');
+        el.style.fontSize = el.getAttribute('data-fs') + 'px';
+        el.style.fontWeight = el.getAttribute('data-weight') || 'normal';
+        el.style.lineHeight = el.getAttribute('data-lh') || '1.2';
+        
+        const align = el.getAttribute('data-align') || 'left';
+        
+        if (align === 'center') {
+            el.style.left = (x + w / 2) + 'px';
+            el.style.top = (y + h / 2) + 'px';
+            el.style.transform = 'translate(-50%, -50%)';
+            el.style.textAlign = 'center';
+        } else {
+            el.style.left = x + 'px';
+            el.style.top = (y + h / 2) + 'px';
+            el.style.transform = 'translateY(-50%)';
+            el.style.textAlign = 'left';
+        }
+        
+        el.style.whiteSpace = 'pre';
+    });
+</script>
+
+</body>
+</html>
